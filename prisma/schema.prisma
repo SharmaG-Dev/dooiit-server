@@ -1,0 +1,178 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  PROVIDER
+  ADMIN
+}
+
+enum Providers {
+  Google
+}
+
+enum ServiceRequestAction {
+  Accepted
+  Rejected
+}
+
+enum ContractStatus {
+  PENDING
+  INPROGRESS
+  COMPLETED
+  DELAY
+  CANCELLED
+}
+
+enum TransactionStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+model User {
+  id           String     @id @default(uuid())
+  name         String
+  email        String     @unique
+  password     String
+  providerId   String?
+  providerType Providers?
+  role         Role       @default(CUSTOMER)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  Profile      Profile?
+}
+
+model Profile {
+  id                     String           @id @default(uuid())
+  userId                 String           @unique
+  user                   User             @relation(references: [id], fields: [userId], onDelete: Cascade)
+  bio                    String
+  avatar                 String
+  rating                 Float?           @default(3.4)
+  serviceRequestSent     ServiceRequest[] @relation("requestedBy")
+  serviceRequestRecieved ServiceRequest[] @relation("requestedTo")
+  createdAt              DateTime         @default(now())
+  updatedAt              DateTime         @updatedAt
+  customerChatRooms      ChatRoom[]       @relation("customerRoom")
+  providerChatRooms      ChatRoom[]       @relation("providerRooms")
+  sendedMessages         Messages[]       @relation("sendedBy")
+  contractCreated        Contract[]       @relation("contractCreated")
+  contractRecieved       Contract[]       @relation("contractRecieved")
+  contractQueries        Queries[]
+  Transactions           Transactions[]
+  Refunds                Refunds[]
+}
+
+model ServiceRequest {
+  id            String               @id @default(uuid())
+  message       String
+  requestedById String
+  requestedBy   Profile              @relation("requestedBy", fields: [requestedById], references: [id])
+  requestedToId String
+  requestedTo   Profile              @relation("requestedTo", fields: [requestedToId], references: [id])
+  actionMessage String
+  actionType    ServiceRequestAction @default(Accepted)
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+}
+
+model ChatRoom {
+  id         String     @id @default(uuid())
+  customerId String
+  customer   Profile    @relation("customerRoom", references: [id], fields: [customerId])
+  provider   Profile    @relation("providerRooms", fields: [providerId], references: [id])
+  providerId String
+  Messages   Messages[]
+  createdAt  DateTime   @default(now())
+  updatedAt  DateTime   @updatedAt
+}
+
+model Messages {
+  id         String   @id @default(uuid())
+  sendedById String
+  sendedBy   Profile  @relation("sendedBy", fields: [sendedById], references: [id])
+  isAdmin    Boolean  @default(false)
+  message    String
+  chatId     String
+  chat       ChatRoom @relation(fields: [chatId], references: [id])
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Contract {
+  id              String         @id @default(uuid())
+  customerId      String
+  customer        Profile        @relation("contractCreated", fields: [customerId], references: [id])
+  providerId      String
+  provider        Profile        @relation("contractRecieved", fields: [providerId], references: [id])
+  contractDetails String
+  amount          Float
+  upload          String?
+  deadline        DateTime?
+  acceptedOn      DateTime?
+  completedOn     DateTime?
+  cancelledOn     DateTime?
+  delayOn         DateTime?
+  additionalTime  DateTime?
+  workStatus      ContractStatus @default(PENDING)
+  paidAmount      Float?
+  balanceAmount   Float?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  Queries         Queries[]
+  Transactions    Transactions[]
+}
+
+model Queries {
+  id          String   @id @default(uuid())
+  message     String
+  contractId  String
+  contract    Contract @relation(fields: [contractId], references: [id])
+  queriedById String
+  queriedBy   Profile  @relation(fields: [queriedById], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Transactions {
+  id               String            @id @default(uuid())
+  transactionId    String
+  amount           Float
+  paymentType      String
+  paidById         String
+  paidBy           Profile           @relation(fields: [paidById], references: [id])
+  contractId       String
+  transactionsInfo Json
+  status           TransactionStatus @default(PENDING)
+  contract         Contract          @relation(fields: [contractId], references: [id])
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  refund           Refunds?          @relation(fields: [refundId], references: [id])
+  refundId         String?
+}
+
+model Refunds {
+  id                   String            @id @default(uuid())
+  transactionId        String
+  amount               Float
+  refundedTransactions Transactions[]
+  transactionsInfo     Json
+  status               TransactionStatus @default(PENDING)
+  refundedToId         String
+  refundedTo           Profile           @relation(fields: [refundedToId], references: [id])
+  createdAt            DateTime          @default(now())
+  updatedAt            DateTime          @updatedAt
+}
