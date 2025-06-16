@@ -24,6 +24,7 @@ enum Providers {
 }
 
 enum ServiceRequestAction {
+  Pending
   Accepted
   Rejected
 }
@@ -59,8 +60,8 @@ model Profile {
   id                     String           @id @default(uuid())
   userId                 String           @unique
   user                   User             @relation(references: [id], fields: [userId], onDelete: Cascade)
-  bio                    String
-  avatar                 String
+  bio                    String?
+  avatar                 String?
   rating                 Float?           @default(3.4)
   serviceRequestSent     ServiceRequest[] @relation("requestedBy")
   serviceRequestRecieved ServiceRequest[] @relation("requestedTo")
@@ -83,8 +84,8 @@ model ServiceRequest {
   requestedBy   Profile              @relation("requestedBy", fields: [requestedById], references: [id])
   requestedToId String
   requestedTo   Profile              @relation("requestedTo", fields: [requestedToId], references: [id])
-  actionMessage String
-  actionType    ServiceRequestAction @default(Accepted)
+  actionMessage String?
+  actionType    ServiceRequestAction @default(Pending)
   createdAt     DateTime             @default(now())
   updatedAt     DateTime             @updatedAt
 }

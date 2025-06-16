@@ -26,3 +26,12 @@ export const handleUpdateUser = async (req: Request, res: Response) => {
     }
 }
 
+export const handleGetUser = async (req: Request, res: Response) => {
+    try {
+        const id = req.params.id
+        const _user = await findUser({ id })
+        if (!_user) return failResponse(res, 404, null, "User Not Found")
+    } catch (error: any) {
+        return errorResponse(res, 500, error, error.message)
+    }
+}

@@ -36,7 +36,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.handleUpdateUser = exports.handleCreateUser = void 0;
+exports.handleGetUser = exports.handleUpdateUser = exports.handleCreateUser = void 0;
 var response_1 = require("../func/response");
 var user_func_1 = require("../func/user.func");
 var handleCreateUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
@@ -83,4 +83,25 @@ var handleUpdateUser = function (req, res) { return __awaiter(void 0, void 0, vo
     });
 }); };
 exports.handleUpdateUser = handleUpdateUser;
+var handleGetUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var id, _user, error_3;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                _a.trys.push([0, 2, , 3]);
+                id = req.params.id;
+                return [4 /*yield*/, (0, user_func_1.findUser)({ id: id })];
+            case 1:
+                _user = _a.sent();
+                if (!_user)
+                    return [2 /*return*/, (0, response_1.failResponse)(res, 404, null, "User Not Found")];
+                return [3 /*break*/, 3];
+            case 2:
+                error_3 = _a.sent();
+                return [2 /*return*/, (0, response_1.errorResponse)(res, 500, error_3, error_3.message)];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.handleGetUser = handleGetUser;
 //# sourceMappingURL=user.controllers.js.map

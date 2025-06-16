@@ -5,7 +5,7 @@ CREATE TYPE "Role" AS ENUM ('CUSTOMER', 'PROVIDER', 'ADMIN');
 CREATE TYPE "Providers" AS ENUM ('Google');
 
 -- CreateEnum
-CREATE TYPE "ServiceRequestAction" AS ENUM ('Accepted', 'Rejected');
+CREATE TYPE "ServiceRequestAction" AS ENUM ('Pending', 'Accepted', 'Rejected');
 
 -- CreateEnum
 CREATE TYPE "ContractStatus" AS ENUM ('PENDING', 'INPROGRESS', 'COMPLETED', 'DELAY', 'CANCELLED');
@@ -32,8 +32,8 @@ CREATE TABLE "User" (
 CREATE TABLE "Profile" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
-    "bio" TEXT NOT NULL,
-    "avatar" TEXT NOT NULL,
+    "bio" TEXT,
+    "avatar" TEXT,
     "rating" DOUBLE PRECISION DEFAULT 3.4,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -47,8 +47,8 @@ CREATE TABLE "ServiceRequest" (
     "message" TEXT NOT NULL,
     "requestedById" TEXT NOT NULL,
     "requestedToId" TEXT NOT NULL,
-    "actionMessage" TEXT NOT NULL,
-    "actionType" "ServiceRequestAction" NOT NULL DEFAULT 'Accepted',
+    "actionMessage" TEXT,
+    "actionType" "ServiceRequestAction",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 
